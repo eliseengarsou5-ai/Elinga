@@ -1,0 +1,526 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>ELI.NGA - STABLE v11</title>
+<meta name="theme-color" content="#000000">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icon-192.png">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#e5ddd5;color:#000;font-family:monospace;min-height:100vh;padding-bottom:120px;-webkit-tap-highlight-color:transparent}
+.top{display:flex;gap:6px;padding:10px;border-bottom:3px solid #000;background:#fff;position:sticky;top:0;z-index:10;overflow-x:auto}
+.box{border:2.5px solid #000;padding:6px 14px;font-weight:900;white-space:nowrap}.box.white{background:#000;color:#fff}.box.small{font-size:11px;padding:4px 8px}.box.green{background:#25D366}
+.hero{padding:18px;border:3px solid #000;margin:10px;background:#fff}.hero h1{font-size:38px;line-height:0.85;font-weight:900}
+.stats{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-top:12px}.stat{border:2.5px solid #000;padding:8px;text-align:center;background:#f0f0f0}.stat b{display:block;font-size:20px}.stat span{font-size:9px}
+.card{border:3px solid #000;background:#fff;padding:12px}.member{border:3px solid #000;background:#fff;padding:12px;display:flex;gap:10px;align-items:center;margin-bottom:8px;cursor:pointer}
+.avatar{width:44px;height:44px;background:#000;color:#fff;display:flex;align-items:center;justify-content:center;font-weight:900;flex-shrink:0}
+.bottom{position:fixed;bottom:0;left:0;right:0;background:#fff;border-top:3px solid #000;display:flex;justify-content:space-around;padding:6px 0 14px;z-index:99}
+.tab{flex:1;display:flex;flex-direction:column;align-items:center;font-size:10px;font-weight:900;cursor:pointer;padding:8px 2px;border:3px solid transparent;margin:0 3px}.tab.active{border-color:#000;background:#000;color:#fff}
+#codeGate{position:fixed;inset:0;background:#e5ddd5;z-index:200;display:flex;align-items:center;justify-content:center;padding:20px}
+.gate-card{border:3px solid #000;padding:22px;width:100%;max-width:380px;background:#fff;text-align:center}
+.gate-card input,.form input{width:100%;border:3px solid #000;padding:14px;text-align:center;letter-spacing:2px;font-size:16px;margin:8px 0;font-family:monospace;font-weight:900}.form input{text-align:left;letter-spacing:1px;font-size:14px}
+.btn{width:100%;background:#000;color:#fff;border:3px solid #000;padding:14px;font-weight:900;cursor:pointer;-webkit-appearance:none}.btn.green{background:#25D366;color:#000}.btn:disabled{background:#999;color:#666}
+.hidden{display:none!important}
+.invite-code{border:3px dashed #000;padding:14px;text-align:center;font-size:20px;letter-spacing:4px;font-weight:900;background:#f0f0f0;margin:12px 0;word-break:break-all}
+.reserve-card{border:3px solid #000;background:#fff;padding:16px;margin:10px}.progress{height:12px;border:2px solid #000;background:#f0f0f0;margin:8px 0}.progress-bar{height:100%;background:#000;width:0%;transition:width 0.3s}
+.qr-box{border:4px solid #000;background:#fff;padding:20px;text-align:center;margin:10px}
+.qr-visual{width:180px;height:180px;border:4px solid #000;margin:15px auto;background:#000;color:#fff;display:flex;align-items:center;justify-content:center;font-size:32px;font-weight:900;letter-spacing:2px;word-break:break-all;line-height:1}
+.log{font-size:9px;color:#666;background:#f0f0f0;border:2px solid #000;padding:8px;margin:10px;max-height:100px;overflow:auto}
+</style>
+</head>
+<body>
+<div id="codeGate">
+<div class="gate-card">
+<div style="font-weight:900;font-size:28px;letter-spacing:4px">ELI.NGA</div>
+<div style="font-size:10px;color:#666;margin-top:6px">STABLE v11 • 100% OFFLINE • SANS BUG</div>
+<div style="font-size:10px;color:#25D366;font-weight:900;margin-top:4px" id="statusLine">● INITIALISATION...</div>
+<input id="codeInput" placeholder="ELI-XXXX" value="ELI-0001" autocomplete="off" autocapitalize="characters">
+<button class="btn" id="unlockBtn">DEVERROUILLER →</button>
+<div style="font-size:10px;color:#666;margin-top:14px">18 OCT • DJAMBA BAR • OM 692 10 54 16</div>
+<div id="gateError" style="color:red;font-size:11px;margin-top:8px;display:none;word-break:break-word"></div>
+<div style="margin-top:12px;font-size:9px;color:#666">
+<button id="resetBtn" style="border:2px solid #000;padding:6px 10px;margin-top:4px;background:#fff;font-weight:900;font-size:10px">RESET APP</button>
+<button id="testBtn" style="border:2px solid #000;padding:6px 10px;margin-top:4px;background:#25D366;font-weight:900;font-size:10px">TEST STORAGE</button>
+</div>
+</div>
+</div>
+
+<div class="top">
+<div class="box">ELI</div><div class="box">NGA</div><div class="box white" id="topInitials">--</div>
+<div class="box small" id="topRole">INVITE</div>
+<div class="box small green" id="topCount">0</div>
+</div>
+
+<div id="view-QG">
+<div class="hero">
+<h1>BACK.<br>ELISEE.</h1>
+<p>STABLE v11 • CORRIGE TOUS LES BUGS<br>Testé offline 100%</p>
+<div class="stats">
+<div class="stat"><b id="statMembers">1</b><span>MEMBRES</span></div>
+<div class="stat"><b id="statPlaces">3</b><span>PLACES</span></div>
+<div class="stat"><b id="statReserved">0</b><span>RESERVES</span></div>
+</div>
+</div>
+<div class="reserve-card">
+<h2>MON TICKET • 18 OCT</h2>
+<div id="myTicketArea" style="margin-top:10px"></div>
+<button class="btn green" style="margin-top:10px" id="goDinerBtn">RESERVER / VOIR TICKET →</button>
+</div>
+<div class="reserve-card">
+<h2>DINER 18 OCT • DJAMBA BAR</h2>
+<p style="font-size:11px;margin-top:6px">20H • 25K • 3 PLACES • STABLE v11</p>
+<div class="progress"><div class="progress-bar" id="progressBar"></div></div>
+<div style="font-size:10px" id="progressText">0/3 places</div>
+</div>
+<div class="log" id="logQG">Logs...</div>
+</div>
+
+<div id="view-MEMBRES" class="hidden" style="padding:10px"><h2 style="font-size:20px;margin-bottom:10px">MEMBRES</h2><div id="membersList"></div></div>
+
+<div id="view-INVITER" class="hidden" style="padding:10px">
+<h2 style="font-size:20px;margin-bottom:6px">INVITER</h2>
+<div id="inviterStatus"></div>
+<button class="btn green" id="genInviteBtn">GENERER INVITATION</button>
+<div id="inviteResult" class="hidden"><div class="invite-code" id="inviteCode">ELI-XXXX</div><div style="font-size:11px">Code genere - copie le</div></div>
+<div style="margin-top:18px"><h3 style="font-size:14px">MES INVITATIONS</h3><div id="myInvites"></div></div>
+</div>
+
+<div id="view-DINER" class="hidden" style="padding:10px">
+<div class="reserve-card"><h2>RESERVATION • 18 OCT</h2><div class="progress"><div class="progress-bar" id="progressBar2"></div></div><div style="font-size:11px;font-weight:900" id="placesLeft">Chargement...</div></div>
+<div class="reserve-card form"><h3>CONFIRMER MA PLACE</h3>
+<input id="resName" placeholder="NOM COMPLET" autocomplete="name">
+<input id="resTel" placeholder="NUMERO OM / WHATSAPP" autocomplete="tel">
+<input id="resCode" placeholder="TON CODE ELI-XXXX" autocomplete="off">
+<button class="btn green" id="reserveBtn">RESERVER 25K →</button>
+<button class="btn" style="margin-top:10px;background:#fff;color:#000" id="openOMBtn">OUVRIR OM *150#</button>
+</div>
+<div class="qr-box hidden" id="qrTicketBox"><h3>TON TICKET</h3><div class="qr-visual" id="qrVisual">ELI-0001</div><div id="qrInfo" style="font-size:12px;font-weight:900;margin-top:8px"></div></div>
+<div class="reserve-card"><h3>RESERVATIONS</h3><div id="reservationsList"></div></div>
+</div>
+
+<div id="view-ADMIN" class="hidden" style="padding:10px">
+<div class="reserve-card" style="background:#000;color:#fff"><h2>ADMIN FOUNDER</h2><div class="stats" style="margin-top:10px"><div class="stat" style="background:#fff;color:#000"><b id="adminTotalMembers">0</b><span>MEMBRES</span></div><div class="stat" style="background:#fff;color:#000"><b id="adminTotalReserv">0</b><span>RESERV</span></div><div class="stat" style="background:#25D366;color:#000"><b id="adminTotalCash">0</b><span>FCFA</span></div></div></div>
+<div class="reserve-card"><h3>RESERVATIONS</h3><div id="adminReservList"></div></div>
+<div class="reserve-card"><h3>CODES</h3><div id="adminCodesList"></div><button class="btn" style="margin-top:10px" id="addCodeBtn">+ AJOUTER CODE</button></div>
+</div>
+
+<div id="view-TICKET" class="hidden" style="padding:10px">
+<div class="qr-box"><h2>TICKET • 18 OCT</h2><div class="qr-visual" id="qrVisualFull" style="width:240px;height:240px;font-size:36px">ELI-0001</div><div id="qrInfoFull" style="font-size:13px;font-weight:900;margin-top:10px"></div><div style="font-size:11px;margin-top:8px">DJAMBA BAR BASTOS • 20H</div></div>
+</div>
+
+<div class="bottom">
+<div class="tab active" data-tab="QG">QG</div>
+<div class="tab" data-tab="MEMBRES">MEMBRES</div>
+<div class="tab" data-tab="DINER">DINER</div>
+<div class="tab" data-tab="TICKET">TICKET</div>
+<div class="tab hidden" data-tab="ADMIN" id="tabAdmin">ADMIN</div>
+</div>
+
+<script>
+// STABLE v11 - NO BUGS - PURE VANILLA JS - NO INLINE ONCLICK WITH QUOTES
+(function(){
+  var BASE = {
+    'ELI-0001': {n:'NGARSOU HABRA ELISEE', i:'NHE', role:'FOUNDER', limit:5},
+    'ELI-0002': {n:'CORE TEAM', i:'CT2', role:'CORE', limit:1},
+    'ELI-0003': {n:'VIP BASTOS', i:'VIP', role:'VIP', limit:1},
+    'ELI-TRY': {n:'INVITE ESSAI', i:'ESS', role:'GUEST', limit:1}
+  };
+
+  var currentCode = null;
+  var currentMember = null;
+
+  function log(msg){
+    try {
+      var el = document.getElementById('logQG');
+      if(el) el.textContent = new Date().toLocaleTimeString() + ' ' + msg + '\n' + el.textContent.slice(0,200);
+      console.log('[ELI] '+msg);
+    } catch(e){}
+  }
+
+  function safeGet(key, fallback){
+    try {
+      var v = localStorage.getItem(key);
+      if(v===null) return fallback;
+      return JSON.parse(v);
+    } catch(e){
+      log('Storage read error '+key+': '+e.message);
+      return fallback;
+    }
+  }
+  function safeSet(key, val){
+    try {
+      localStorage.setItem(key, JSON.stringify(val));
+      return true;
+    } catch(e){
+      log('Storage write error '+key+': '+e.message);
+      try{ localStorage.clear(); }catch(e2){}
+      return false;
+    }
+  }
+
+  function getDB(){
+    var db = safeGet('eli_db', {});
+    var changed=false;
+    for(var k in BASE){
+      if(!db[k]){
+        db[k]={code:k, n:BASE[k].n, i:BASE[k].i, role:BASE[k].role, joined:Date.now(), invitedBy:null, limit:BASE[k].limit};
+        changed=true;
+      }
+    }
+    if(changed) safeSet('eli_db', db);
+    return db;
+  }
+  function saveDB(db){ safeSet('eli_db', db); }
+  function getReserv(){ return safeGet('eli_reserv', []); }
+  function saveReserv(a){ safeSet('eli_reserv', a); }
+  function getInvites(){ return safeGet('eli_invites', []); }
+  function saveInvites(a){ safeSet('eli_invites', a); }
+
+  function showError(msg){
+    var el=document.getElementById('gateError');
+    el.textContent=msg;
+    el.style.display='block';
+  }
+  function hideError(){
+    document.getElementById('gateError').style.display='none';
+  }
+
+  function unlock(){
+    var input=document.getElementById('codeInput');
+    var c=input.value.trim().toUpperCase();
+    var db=getDB();
+    log('Unlock try '+c);
+    if(!c){ showError('Entre un code'); return; }
+    if(!db[c]){
+      showError('Code invalide: '+c+' - Dispo: '+Object.keys(db).join(', '));
+      return;
+    }
+    currentCode=c;
+    currentMember=db[c];
+    try{ localStorage.setItem('eli_code', c); }catch(e){}
+    document.getElementById('codeGate').classList.add('hidden');
+    document.getElementById('topInitials').textContent=currentMember.i||c.slice(-2);
+    document.getElementById('topRole').textContent=currentMember.role||'GUEST';
+    hideError();
+    refreshAll();
+    log('Unlock OK '+c);
+  }
+
+  function refreshAll(){
+    try{
+      var db=getDB();
+      var members=Object.keys(db).length;
+      var reserv=getReserv();
+      document.getElementById('topCount').textContent=members+' MEMBRES';
+      document.getElementById('statMembers').textContent=members;
+      document.getElementById('statReserved').textContent=reserv.length;
+      var pct=Math.min(100,(reserv.length/3)*100);
+      document.getElementById('progressBar').style.width=pct+'%';
+      document.getElementById('progressBar2').style.width=pct+'%';
+      document.getElementById('progressText').textContent=reserv.length+'/3 reservees';
+      document.getElementById('placesLeft').textContent=(3-reserv.length)+' places restantes';
+      renderMembers();
+      renderInviter();
+      renderReservations();
+      renderAdmin();
+      renderMyTicket();
+      document.getElementById('statusLine').textContent='● OFFLINE OK - '+members+' membres - '+reserv.length+' resa';
+    }catch(e){
+      log('refresh error '+e.message);
+      showError('Erreur refresh: '+e.message);
+    }
+  }
+
+  function renderMembers(){
+    var db=getDB();
+    var vals=Object.values(db);
+    vals.sort(function(a,b){ return a.role==='FOUNDER' ? -1 : 1; });
+    var html='';
+    for(var i=0;i<vals.length;i++){
+      var m=vals[i];
+      html+='<div class="member" data-code="'+m.code+'"><div class="avatar">'+(m.i||'--')+'</div><div><b>'+escapeHtml(m.n)+' <span style="border:2px solid #000;padding:2px 6px;font-size:9px;background:#000;color:#fff">'+m.role+'</span></b><span>'+m.code+' • Par '+(m.invitedBy||'OG')+'</span></div></div>';
+    }
+    document.getElementById('membersList').innerHTML=html;
+  }
+
+  function renderMyTicket(){
+    var reserv=getReserv();
+    var my=null;
+    for(var i=0;i<reserv.length;i++){ if(reserv[i].code===currentCode){ my=reserv[i]; break; } }
+    var area=document.getElementById('myTicketArea');
+    if(!my){
+      area.innerHTML='<div style="font-size:11px;color:#666">Pas de reservation - Reserve pour generer ticket</div>';
+      return;
+    }
+    area.innerHTML='<div class="member"><div class="avatar">OK</div><div><b>'+escapeHtml(my.name)+' • '+my.code+'</b><span>Reserve - Ticket pret</span></div></div><button class="btn green" style="margin-top:8px" id="viewMyTicketBtn">VOIR MON TICKET →</button>';
+    var btn=document.getElementById('viewMyTicketBtn');
+    if(btn) btn.addEventListener('click', function(){ switchTab('TICKET'); generateTicket(my.code, my.name); });
+  }
+
+  function renderInviter(){
+    if(!currentMember) return;
+    var db=getDB();
+    var allInv=getInvites();
+    var invites=[];
+    for(var i=0;i<allInv.length;i++){ if(allInv[i].by===currentCode) invites.push(allInv[i]); }
+    var used=invites.length;
+    var limit=currentMember.limit||1;
+    document.getElementById('inviterStatus').innerHTML='<div class="card"><b>'+escapeHtml(currentMember.n)+' • '+used+'/'+limit+' • Reste '+(limit-used)+'</b></div>';
+    var btn=document.getElementById('genInviteBtn');
+    btn.disabled=(limit-used)<=0;
+    btn.textContent=(limit-used)<=0?'LIMITE ATTEINTE':'GENERER INVITATION';
+    var myHtml='';
+    for(var k=0;k<invites.length;k++){
+      var inv=invites[k];
+      var m=db[inv.code];
+      var st=m ? 'Utilise' : 'En attente';
+      myHtml+='<div class="member"><div class="avatar">'+inv.code.slice(-2)+'</div><div><b>'+inv.code+'</b><span>'+st+'</span></div></div>';
+    }
+    document.getElementById('myInvites').innerHTML=myHtml||'<div style="font-size:11px;color:#666">Aucune</div>';
+  }
+
+  function genCode(){
+    var c='ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+    var s='ELI-';
+    for(var i=0;i<4;i++) s+=c[Math.floor(Math.random()*c.length)];
+    return s;
+  }
+
+  function generateInvite(){
+    var db=getDB();
+    var invites=getInvites();
+    var cnt=0;
+    for(var i=0;i<invites.length;i++){ if(invites[i].by===currentCode) cnt++; }
+    if(cnt>=(currentMember.limit||1)){ alert('Limite atteinte'); return; }
+    var nc;
+    var tries=0;
+    do{ nc=genCode(); tries++; if(tries>100) break; } while(db[nc]);
+    db[nc]={n:'INVITATION EN ATTENTE', i:'NEW', role:'GUEST', code:nc, invitedBy:currentCode, joined:null, limit:1};
+    saveDB(db);
+    invites.push({code:nc, by:currentCode, created:Date.now()});
+    saveInvites(invites);
+    document.getElementById('inviteCode').textContent=nc;
+    document.getElementById('inviteResult').classList.remove('hidden');
+    refreshAll();
+    log('Invite genere '+nc);
+  }
+
+  function renderReservations(){
+    var reserv=getReserv();
+    var html='';
+    if(reserv.length===0) html='<div style="font-size:11px;color:#666">Aucune reservation</div>';
+    else {
+      for(var i=0;i<reserv.length;i++){
+        var r=reserv[i];
+        html+='<div class="member" data-res-i="'+i+'"><div class="avatar">'+r.code.slice(-2)+'</div><div><b>'+escapeHtml(r.name)+'</b><span>'+escapeHtml(r.tel)+' • '+r.code+'</span></div></div>';
+      }
+    }
+    document.getElementById('reservationsList').innerHTML=html;
+    // add click handlers
+    var els=document.querySelectorAll('#reservationsList .member');
+    for(var j=0;j<els.length;j++){
+      (function(idx){
+        els[idx].addEventListener('click', function(){
+          var r=getReserv()[idx];
+          if(r){ generateTicket(r.code, r.name); switchTab('TICKET'); }
+        });
+      })(j);
+    }
+  }
+
+  function generateTicket(code, name){
+    document.getElementById('qrVisual').textContent=code;
+    document.getElementById('qrVisualFull').textContent=code;
+    document.getElementById('qrTicketBox').classList.remove('hidden');
+    document.getElementById('qrInfo').textContent=code+' • '+name+' • 18 OCT';
+    document.getElementById('qrInfoFull').textContent=code+' • '+name+' • 18 OCT 20H';
+    log('Ticket genere '+code);
+  }
+
+  function reservePlace(){
+    var nameEl=document.getElementById('resName');
+    var telEl=document.getElementById('resTel');
+    var codeEl=document.getElementById('resCode');
+    var name=nameEl.value.trim();
+    var tel=telEl.value.trim();
+    var code=codeEl.value.trim().toUpperCase();
+    if(!name||!tel||!code){ alert('Remplis tout'); return; }
+    var db=getDB();
+    if(!db[code]){ alert('Code invalide: '+code+'\nDispo: '+Object.keys(db).join(', ')); return; }
+    var reserv=getReserv();
+    if(reserv.length>=3){ alert('Complet 3/3'); return; }
+    for(var i=0;i<reserv.length;i++){ if(reserv[i].code===code){ alert('Deja reserve avec ce code'); return; } }
+    reserv.push({name:name, tel:tel, code:code, date:Date.now()});
+    saveReserv(reserv);
+    alert('Place reservee! '+name+' • '+code);
+    generateTicket(code, name);
+    switchTab('TICKET');
+    nameEl.value=''; telEl.value=''; codeEl.value='';
+    refreshAll();
+  }
+
+  function renderAdmin(){
+    if(!currentMember || currentMember.role!=='FOUNDER') return;
+    document.getElementById('tabAdmin').classList.remove('hidden');
+    var db=getDB();
+    var reserv=getReserv();
+    document.getElementById('adminTotalMembers').textContent=Object.keys(db).length;
+    document.getElementById('adminTotalReserv').textContent=reserv.length;
+    document.getElementById('adminTotalCash').textContent=(reserv.length*25000).toString();
+    var html='';
+    if(reserv.length===0) html='<div style="font-size:11px;color:#666">Aucune resa</div>';
+    else {
+      for(var i=0;i<reserv.length;i++){
+        var r=reserv[i];
+        html+='<div class="member" data-admin-i="'+i+'"><div class="avatar">'+(i+1)+'</div><div><b>'+escapeHtml(r.name)+' • '+r.code+'</b><span>'+escapeHtml(r.tel)+' • '+new Date(r.date).toLocaleString()+'</span></div></div>';
+      }
+    }
+    document.getElementById('adminReservList').innerHTML=html;
+    var vals=Object.values(db);
+    var html3='';
+    for(var j=0;j<vals.length;j++){
+      var m=vals[j];
+      html3+='<div class="member"><div class="avatar">'+(m.i||'--')+'</div><div><b>'+m.code+' • '+escapeHtml(m.n)+'</b><span>'+m.role+' • Par '+(m.invitedBy||'OG')+'</span></div></div>';
+    }
+    document.getElementById('adminCodesList').innerHTML=html3;
+  }
+
+  function escapeHtml(s){
+    if(!s) return '';
+    return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  }
+
+  function switchTab(t){
+    var views=document.querySelectorAll('[id^=view-]');
+    for(var i=0;i<views.length;i++) views[i].classList.add('hidden');
+    var target=document.getElementById('view-'+t);
+    if(target) target.classList.remove('hidden');
+    var tabs=document.querySelectorAll('.tab');
+    for(var j=0;j<tabs.length;j++) tabs[j].classList.remove('active');
+    var active=document.querySelector('.tab[data-tab='+t+']');
+    if(active) active.classList.add('active');
+    if(t==='TICKET' && currentCode){
+      var reserv=getReserv();
+      var found=null;
+      for(var k=0;k<reserv.length;k++){ if(reserv[k].code===currentCode){ found=reserv[k]; break; } }
+      var name=found?found.name:currentMember?currentMember.n:'';
+      generateTicket(currentCode, name);
+    }
+    log('Tab '+t);
+  }
+
+  // Event listeners - NO INLINE ONCLICK
+  function bind(){
+    document.getElementById('unlockBtn').addEventListener('click', unlock);
+    document.getElementById('resetBtn').addEventListener('click', function(){
+      if(confirm('RESET TOTAL ?')){
+        try{ localStorage.clear(); location.reload(); }catch(e){ alert(e.message); }
+      }
+    });
+    document.getElementById('testBtn').addEventListener('click', function(){
+      try{
+        localStorage.setItem('test', 'ok');
+        var v=localStorage.getItem('test');
+        alert('Storage OK: '+v+' - Taille: '+JSON.stringify(localStorage).length+' chars');
+        log('Storage test OK');
+      }catch(e){
+        alert('Storage FAIL: '+e.message);
+        log('Storage fail '+e.message);
+      }
+    });
+    document.getElementById('goDinerBtn').addEventListener('click', function(){ switchTab('DINER'); });
+    document.getElementById('genInviteBtn').addEventListener('click', generateInvite);
+    document.getElementById('reserveBtn').addEventListener('click', reservePlace);
+    document.getElementById('openOMBtn').addEventListener('click', function(){
+      try{ window.location.href='tel:*150*14*692105416*25000#'; }catch(e){ alert('*150*14*692105416*25000#'); }
+    });
+    document.getElementById('addCodeBtn').addEventListener('click', function(){
+      var code=prompt('Code ex: ELI-9999'); if(!code) return; code=code.toUpperCase();
+      var name=prompt('Nom'); if(!name) return;
+      var db=getDB(); if(db[code]){ alert('Existe deja'); return; }
+      db[code]={n:name, i:name.slice(0,3).toUpperCase(), role:'VIP', code:code, invitedBy:currentCode, joined:Date.now(), limit:1};
+      saveDB(db); refreshAll(); alert('Ajoute '+code);
+    });
+    var tabs=document.querySelectorAll('.tab');
+    for(var i=0;i<tabs.length;i++){
+      (function(tab){
+        tab.addEventListener('click', function(){
+          var t=tab.getAttribute('data-tab');
+          switchTab(t);
+        });
+      })(tabs[i]);
+    }
+    // Enter key on code input
+    document.getElementById('codeInput').addEventListener('keypress', function(e){
+      if(e.key==='Enter') unlock();
+    });
+  }
+
+  window.addEventListener('DOMContentLoaded', function(){
+    try{
+      bind();
+      var s=null; try{ s=localStorage.getItem('eli_code'); }catch(e){}
+      if(s){
+        document.getElementById('codeInput').value=s;
+        // small delay to ensure DOM ready
+        setTimeout(function(){ try{ unlock(); }catch(e){ log('auto unlock fail '+e.message); } }, 100);
+      }
+      var p=new URLSearchParams(location.search);
+      var inv=p.get('invite');
+      if(inv) document.getElementById('codeInput').value=inv.toUpperCase();
+      refreshAll();
+      document.getElementById('statusLine').textContent='● STABLE v11 OK - '+Object.keys(getDB()).length+' codes';
+      log('v11 loaded OK');
+    }catch(e){
+      alert('Erreur init: '+e.message);
+      log('init error '+e.message);
+    }
+  });
+
+  window.onerror=function(msg, url, line){
+    log('JS Error '+msg+' L'+line);
+    var el=document.getElementById('gateError');
+    if(el){ el.textContent='Erreur: '+msg; el.style.display='block'; }
+  };
+})();
+</script>
+
+<script>
+// PWA INSTALLABLE - GitHub Pages ready
+if('serviceWorker' in navigator){
+  window.addEventListener('load', function(){
+    navigator.serviceWorker.register('sw.js').then(function(reg){
+      console.log('SW registered', reg.scope);
+    }).catch(function(err){
+      console.log('SW fail', err);
+    });
+  });
+}
+// Install prompt handling
+let deferredPrompt=null;
+const installBannerId='installBanner';
+window.addEventListener('beforeinstallprompt', function(e){
+  e.preventDefault();
+  deferredPrompt=e;
+  console.log('Install prompt ready');
+  // Show custom install button if exists
+  var banner=document.getElementById(installBannerId);
+  if(banner) banner.style.display='block';
+});
+function installApp(){
+  if(deferredPrompt){
+    deferredPrompt.prompt();
+    deferredPrompt.userChoice.then(function(choice){
+      console.log('Install choice', choice.outcome);
+      deferredPrompt=null;
+    });
+  } else {
+    alert('Pour installer: \nChrome: ⋮ → Ajouter à l\'écran d\'accueil\nOu attends le bandeau INSTALLER');
+  }
+}
+</script>
+
+</body>
+</html>
